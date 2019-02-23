@@ -1,5 +1,5 @@
 CREATE TABLE samples (
-    id INTEGER PRIMARY KEY NOT NULL,
+    id SERIAL PRIMARY KEY,
     symbol_id INTEGER NOT NULL,
     date DATE NOT NULL,
     open INTEGER NOT NULL,
@@ -9,5 +9,6 @@ CREATE TABLE samples (
     volume INTEGER NOT NULL,
     dividend INTEGER NOT NULL,
     split_coeff INTEGER NOT NULL,
-    FOREIGN KEY(symbol_id) REFERENCES symbols(id)
+    FOREIGN KEY(symbol_id) REFERENCES symbols(id),
+    UNIQUE (date, symbol_id)
 )

@@ -12,6 +12,7 @@ use std::io::Read;
 use std::path::Path;
 use std::time::Instant;
 use structopt::StructOpt;
+use asxk::establish_psql_connection;
 
 #[derive(Debug, StructOpt)]
 pub struct Opt {
@@ -24,7 +25,7 @@ fn main() {
 
     println!("{:?}", path);
 
-    let connection = establish_connection();
+    let connection = establish_psql_connection();
     let mut now = Instant::now();
     let mut count = populate_symbols(&connection, path).unwrap();
     println!(
@@ -32,6 +33,14 @@ fn main() {
         count,
         now.elapsed().as_millis()
     );
+
+    use asxk::schema::symbols::dsl::*;
+
+    let symbol_list = symbols
+        .load::<Symbol>(&connection)
+        .expect("Failed to load symbols from database");
+
+    for s in symbol_list {}
 
     // Populate prices
 
@@ -50,7 +59,6 @@ fn main() {
         now.elapsed().as_millis()
     );
 
-    use asxk::schema::symbols::dsl::*;
     let lookup = symbols
         .filter(symbol.eq("A2M"))
         .first::<Symbol>(&connection)

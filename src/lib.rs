@@ -21,39 +21,49 @@ use models::Symbol;
 use std::error::Error;
 use std::path::Path;
 
-pub fn establish_connection() -> SqliteConnection {
+pub fn establish_psql_connection() -> PgConnection {
     dotenv().ok();
 
     let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
-    SqliteConnection::establish(&database_url)
-        .unwrap_or_else(|_| panic!("Error connecting to {}", database_url))
+    PgConnection::establish(&database_url)
+        .unwrap_or_else(|_| panic!("Failure connecting to psql db"))
 }
 
-pub fn populate_symbols(connection: &SqliteConnection, path: &Path) -> Result<usize, Box<Error>> {
+pub fn populate_symbols(connection: &PgConnection, path: &Path) -> Result<usize, Box<Error>> {
     let mut reader = csv::Reader::from_path(path)?;
     let mut symbol_list: Vec<NewSymbol> = Vec::new();
 
-    symbol_list = reader.records().map(|record| {
-        let str_record = record.unwrap();
-        NewSymbol {
-            name: str_record.get(0).ok_or("Couldn't get name").unwrap().to_string(),
-            symbol: str_record.get(1).ok_or("Couldn't get symbol").unwrap().to_string(),
-            exchange: "ASX".to_string(),
-        }
-
-    }).collect();
+    symbol_list = reader
+        .records()
+        .map(|record| {
+            let str_record = record.unwrap();
+            NewSymbol {
+                name: str_record
+                    .get(0)
+                    .ok_or("Couldn't get name")
+                    .unwrap()
+                    .to_string(),
+                symbol: str_record
+                    .get(1)
+                    .ok_or("Couldn't get symbol")
+                    .unwrap()
+                    .to_string(),
+                exchange: "ASX".to_string(),
+            }
+        })
+        .collect();
     let count = symbol_list.len();
 
     use schema::symbols::dsl::*;
     diesel::insert_into(symbols)
-        .values(symbol_list)
+        .values(symbol_list).on_conflict_do_nothing()
         .execute(connection)
         .expect("Failed to insert symbols");
     Ok(count)
 }
 
 pub fn populate_samples(
-    connection: &SqliteConnection,
+    connection: &PgConnection,
     av_reply: &AVTop,
 ) -> Result<usize, Box<Error>> {
     let meta_data = &av_reply.meta_data;
@@ -85,7 +95,7 @@ pub fn populate_samples(
     use schema::samples::dsl::*;
 
     diesel::insert_into(samples)
-        .values(new_samples)
+        .values(new_samples).on_conflict_do_nothing()
         .execute(connection)
         .expect("asdf");
     return Ok(count);

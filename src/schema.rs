@@ -1,36 +1,40 @@
 table! {
     samples (id) {
-        id -> Integer,
-        symbol_id -> Integer,
+        id -> Int4,
+        symbol_id -> Int4,
         date -> Date,
-        open -> Integer,
-        high -> Integer,
-        low -> Integer,
-        close -> Integer,
-        volume -> Integer,
-        dividend -> Integer,
-        split_coeff -> Integer,
+        open -> Int4,
+        high -> Int4,
+        low -> Int4,
+        close -> Int4,
+        volume -> Int4,
+        dividend -> Int4,
+        split_coeff -> Int4,
     }
 }
 
 table! {
     sectors (id) {
-        id -> Integer,
-        name -> Text,
+        id -> Int4,
+        name -> Varchar,
     }
 }
 
 table! {
     symbols (id) {
-        id -> Integer,
-        exchange -> Text,
-        symbol -> Text,
-        name -> Text,
-        sector -> Nullable<Integer>,
+        id -> Int4,
+        exchange -> Varchar,
+        symbol -> Varchar,
+        name -> Varchar,
+        sector -> Nullable<Int4>,
     }
 }
 
 joinable!(samples -> symbols (symbol_id));
 joinable!(symbols -> sectors (sector));
 
-allow_tables_to_appear_in_same_query!(samples, sectors, symbols,);
+allow_tables_to_appear_in_same_query!(
+    samples,
+    sectors,
+    symbols,
+);
