@@ -52,14 +52,13 @@ pub fn populate_symbols(connection: &PgConnection, path: &Path) -> Result<usize,
             }
         })
         .collect();
-    let count = symbol_list.len();
 
     use schema::symbols::dsl::*;
-    diesel::insert_into(symbols)
+    let inserted_count = diesel::insert_into(symbols)
         .values(symbol_list).on_conflict_do_nothing()
         .execute(connection)
         .expect("Failed to insert symbols");
-    Ok(count)
+    Ok(inserted_count)
 }
 
 pub fn populate_samples(
@@ -90,13 +89,11 @@ pub fn populate_samples(
         })
         .collect();
 
-    let count = new_samples.len();
-
     use schema::samples::dsl::*;
 
-    diesel::insert_into(samples)
+    let inserted_count = diesel::insert_into(samples)
         .values(new_samples).on_conflict_do_nothing()
         .execute(connection)
         .expect("asdf");
-    return Ok(count);
+    return Ok(inserted_count);
 }

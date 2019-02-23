@@ -31,7 +31,6 @@ table! {
 }
 
 joinable!(samples -> symbols (symbol_id));
-joinable!(symbols -> sectors (sector));
 
 allow_tables_to_appear_in_same_query!(
     samples,

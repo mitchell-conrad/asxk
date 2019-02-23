@@ -2,7 +2,7 @@ extern crate csv;
 extern crate diesel;
 extern crate structopt;
 use asxk::models::{AVTop, Sample, Symbol};
-use asxk::{establish_connection, populate_samples, populate_symbols};
+use asxk::{establish_psql_connection, populate_samples, populate_symbols};
 use diesel::query_dsl::RunQueryDsl;
 use diesel::BelongingToDsl;
 use diesel::ExpressionMethods;
@@ -12,7 +12,6 @@ use std::io::Read;
 use std::path::Path;
 use std::time::Instant;
 use structopt::StructOpt;
-use asxk::establish_psql_connection;
 
 #[derive(Debug, StructOpt)]
 pub struct Opt {
@@ -40,7 +39,13 @@ fn main() {
         .load::<Symbol>(&connection)
         .expect("Failed to load symbols from database");
 
-    for s in symbol_list {}
+    for s in symbol_list {
+        // Get json use compact
+
+        // Parse json
+
+        // Insert parsed vals
+    }
 
     // Populate prices
 
@@ -54,7 +59,8 @@ fn main() {
     now = Instant::now();
     count = populate_samples(&connection, &av_samples).unwrap();
     println!(
-        "Populated {} samples in {}ms",
+        "Populated symbol {} with {} samples in {}ms",
+        av_samples.meta_data.symbol,
         count,
         now.elapsed().as_millis()
     );
