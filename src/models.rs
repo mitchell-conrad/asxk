@@ -56,9 +56,9 @@ impl AVSample {
 #[derive(Identifiable, Queryable)]
 pub struct Symbol {
     pub id: i32,
-    pub name: String,
-    pub symbol: String,
     pub exchange: String,
+    pub symbol: String,
+    pub name: String,
     pub sector: Option<i32>,
 }
 
@@ -99,7 +99,7 @@ impl NewSample {
             open: float_fix(&av_sample.open),
             low: float_fix(&av_sample.low),
             close: float_fix(&av_sample.adj_close),
-            volume: av_sample.volume.parse().unwrap(),
+            volume: av_sample.volume.parse().expect("Unable to parse volume!"),
             dividend: float_fix(&av_sample.div),
             split_coeff: float_fix(&av_sample.split_coefficient),
             date,
@@ -117,5 +117,8 @@ pub struct NewSymbol {
 }
 
 fn float_fix(string: &str) -> i32 {
-    (string.parse::<f32>().unwrap() * 1000.0) as i32
+    (string
+        .parse::<f32>()
+        .expect("Unable to parse in float_fix!")
+        * 1000.0) as i32
 }
