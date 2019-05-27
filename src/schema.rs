@@ -30,6 +30,23 @@ table! {
     }
 }
 
-joinable!(samples -> symbols (symbol_id));
+table! {
+    transactions (id) {
+        id -> Int4,
+        symbol_id -> Int4,
+        date -> Date,
+        price -> Int4,
+        volume -> Int4,
+        brokerage -> Int4,
+    }
+}
 
-allow_tables_to_appear_in_same_query!(samples, sectors, symbols,);
+joinable!(samples -> symbols (symbol_id));
+joinable!(transactions -> symbols (symbol_id));
+
+allow_tables_to_appear_in_same_query!(
+    samples,
+    sectors,
+    symbols,
+    transactions,
+);

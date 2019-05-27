@@ -1,5 +1,6 @@
 use super::schema::samples;
 use super::schema::symbols;
+use super::schema::transactions;
 use chrono::NaiveDate;
 use std::collections::hash_map::HashMap;
 
@@ -114,6 +115,43 @@ pub struct NewSymbol {
     pub symbol: String,
     pub exchange: String,
     //pub sector: &'a str,
+}
+
+#[derive(Debug, Associations, Insertable, Deserialize)]
+#[table_name = "transactions"]
+pub struct NewTransaction {
+    pub symbol_id: i32,
+    pub date: NaiveDate,
+    pub price: i32,
+    pub volume: i32,
+    pub brokerage: i32,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct CSVTransaction {
+    pub symbol: String,
+    pub date: String,
+    pub price: String,
+    pub volume: String,
+    pub brokerage: String,
+}
+
+impl CSVTransaction {
+    pub fn to_transaction(&self, symbol_id: i32) -> NewTransaction {
+        NewTransaction::from_csv_transaction(self, symbol_id)
+    }
+}
+
+impl NewTransaction {
+    pub fn from_csv_transaction(csv: &CSVTransaction, symbol_id: i32) -> Self {
+        NewTransaction {
+            symbol_id,
+            date: NaiveDate::parse_from_str(&csv.date, "%Y-%m-%d").unwrap(),
+            price: float_fix(&csv.price),
+            volume: csv.volume.parse().expect("Failed to parse volume"),
+            brokerage: float_fix(&csv.brokerage),
+        }
+    }
 }
 
 fn float_fix(string: &str) -> i32 {
